@@ -8,12 +8,8 @@ find_package(OpenMP REQUIRED)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-set(SOURCE
-        lib/adaptive_thresholding.cpp)
-
-set(HEADERS
-        lib/benchmarking.hpp
-        lib/adaptive_thresholding.hpp)
-
-add_executable(bradley bradley.cpp ${SOURCE} ${HEADERS})
+add_executable(bradley bradley.cpp lib/adaptive_thresholding.cpp)
 target_link_libraries(bradley PRIVATE ${OpenCV_LIBS} OpenMP::OpenMP_CXX)
+
+add_executable(disarium disarium.cpp lib/disarium_number.cpp)
+target_link_libraries(disarium PRIVATE ${OpenCV_LIBS} OpenMP::OpenMP_CXX)

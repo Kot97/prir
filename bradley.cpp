@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     }
 
     std::cout << "Bradley algorithm on image " << argv[2] << std::endl;
+    std::cout << "Thread count: " << argv[1] << std::endl;
 
     adaptive_thresholding algorithm(argv[2]);
     auto timing_function = [](){ return omp_get_wtime(); };
