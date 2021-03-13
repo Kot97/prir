@@ -17,8 +17,8 @@ int main(int argc, char *argv[])
     adaptive_thresholding algorithm(argv[2]);
     auto timing_function = [](){ return omp_get_wtime(); };
 
-    double serial_time = benchmark(20, timing_function, [&algorithm](){ algorithm.run_serial(); });
-    double openmp_time = benchmark(20, timing_function,
+    double serial_time = benchmark(1000, timing_function, [&algorithm](){ algorithm.run_serial(); });
+    double openmp_time = benchmark(1000, timing_function,
                                 [&algorithm, argv](){ algorithm.run_openmp(strtol(argv[1], nullptr, 10)); });
 
     std::cout << "Serial time: " << serial_time << std::endl;

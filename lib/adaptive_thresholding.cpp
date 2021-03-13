@@ -66,7 +66,7 @@ cv::Mat adaptive_thresholding::run_openmp(std::size_t threads_count)
 
     cv::integral(image, sumMat);
 
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(threads_count)
     for (int i = 0; i < rows; ++i)
     {
         uchar *p_inputMat, *p_outputMat;
@@ -84,7 +84,7 @@ cv::Mat adaptive_thresholding::run_openmp(std::size_t threads_count)
         p_inputMat = image.ptr<uchar>(i);
         p_outputMat = result.ptr<uchar>(i);
 
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(threads_count)
         for (int j = 0; j < cols; ++j)
         {
             int x1, x2, count, sum;
