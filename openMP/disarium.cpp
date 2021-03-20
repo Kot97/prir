@@ -17,8 +17,8 @@ int main(int argc, char *argv[])
     std::size_t size = 100000;
     auto timing_function = [](){ return omp_get_wtime(); };
 
-    double serial_time = benchmark(100, timing_function, [size](){ generate_disarium_numbers_serial(size); });
-    double openmp_time = benchmark(100, timing_function,
+    double serial_time = benchmark(1000, timing_function, [size](){ generate_disarium_numbers_serial(size); });
+    double openmp_time = benchmark(1000, timing_function,
                                 [size, argv](){ generate_disarium_numbers_openmp(size, strtol(argv[1], nullptr, 10)); });
 
     std::cout << "Serial time: " << serial_time << std::endl;

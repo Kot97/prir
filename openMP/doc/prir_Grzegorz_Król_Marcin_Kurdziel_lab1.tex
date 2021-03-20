@@ -1,0 +1,93 @@
+\documentclass[12pt]{article}
+\usepackage{polski}
+\usepackage{bchart}
+\usepackage{graphicx} 
+\usepackage[utf8]{inputenc}
+\title{Sprawozdanie z labolatorium 1}
+\author{Grzegorz Król, Marcin Kurdziel}
+\begin{document}
+ 	\maketitle
+ 	\section{Specyfikacja maszyny testowej}
+ 		\begin{itemize}
+ 			\item System operacyjny: Ubuntu 20.04.2 pracujące w maszynie wirtualnej Oracle VirtualBox
+ 			\item Procesor Intel: i5-2400 4x3,1GHz, turbo boost 3,4Ghz
+ 			\item Ram przydzielony maszynie wirtualnej: 4GB DDR3 1333 MHz 
+ 		\end{itemize}	
+	\section{Algorytm binaryzacji adaptacyjnej Bradleya}
+	
+		\subsection{Implementacja algorytmu}
+		Algorytm zaimplementowany został w postaci klasy adaptive\_thresholding posiadającej dwie metody:
+			\begin{itemize}
+				\item
+				 cv::Mat run\_serial() zawiera nierównoległą implementację algorytmu
+				\item
+				 cv::Mat run\_openmp(std::size\_t threads\_count) 	zawiera zrównolegloną przy pomocy OpenMP implementację algorytmu wykonywaną przy pomocy threads\_count wątków.
+			\end{itemize}
+		
+		\subsection{Sposób testowania}
+		Po uruchomieniu programu załadowany zostaje do pamięci wskazany obraz, a następnie przy pomocy funkcji benchmark zostaje dwudziestokrotnie uruchomiona każda z dwóch implementacji algorytmu. Oczywiście w trakcie trwania testów nie jest używane standardowe wyjście tekstu. Program zwraca średni czas potrzebny na wykonanie nierównoległej oraz równoległej wersji algorytmu. Do testów wykorzystany został przedstawiony obraz o rozmiarach 22373x4561 pikseli.
+		\begin{figure}[ht]
+		\includegraphics[width=\textwidth] {city2.jpg}
+		\end{figure}
+		\subsection{Zebrane wyniki}	
+		Poniższa tabela zawiera zebrane wyniki: \newline
+		
+		\begin{tabular}{|r|l|}  \hline 
+			serial		&	7,88591 s \\
+			1 thread	&	7,45781 s \\
+			2 threads	&	6,37856 s \\
+			3 threads	&	6,00728 s \\
+			4 threads	&	5,79122 s \\
+			5 threads	&	5,93873 s \\
+			6 threads	&	5,85136 s \\
+			7 threads	&	5,93159 s \\
+			8 threads	&	5,82764 s \\
+			\hline
+		\end{tabular}\newline 
+		
+		Poniższy wykres prezentuje dane tabeli w graficznej formie:	\newline
+		\begin{bchart}[step=1, max=8, unit=s]
+			\bcbar[text=serial]   {7.88591}
+			\bcbar[text=1 thread] {7.45781}
+			\bcbar[text=2 threads]{6.37856}
+			\bcbar[text=3 threads]{6.00728}
+			\bcbar[text=4 threads]{5.79122}
+			\bcbar[text=5 threads]{5.93873}
+			\bcbar[text=6 threads]{5.85136}
+			\bcbar[text=7 threads]{5.93159}
+			\bcbar[text=8 threads]{5.82764}
+		\end{bchart}
+	
+	\section{Algorytm "Disarium Number"}
+		\subsection{Implementacja algorytmu}
+				Algorytm zaimplementowany został w postaci dwóch metod jednej zaierającej implementacje niezrównolegloną oraz drugiej zawierającej wersję wykorzystującą OpenMP
+		\subsection{Sposób testowania}
+				Podobnie jak i w przypadku poprzedniego algorytmu i tym razem użyta została funkcja benchmark jednak tym razem wykonująca 1000 powtórzeń algorytmu.
+		\subsection{Zebrane wyniki}	
+				Poniższa tabela zawiera zebrane wyniki: \newline
+		\begin{tabular}{|r|l|} \hline
+			serial		&	0,0517572 s \\
+			1 thread	&	0,0488780 s \\
+			2 threads	&	0,0250712 s \\
+			3 threads	&	0,0180976 s \\
+			4 threads	&	0,0138043 s \\
+			5 threads	&	0,0194655 s \\
+			6 threads	&	0,0172609 s \\
+			7 threads	&	0,0151024 s \\
+			8 threads	&	0,0139309 s \\
+			\hline
+		\end{tabular}\newline 
+		
+		Poniższy wykres prezentuje dane tabeli w graficznej formie:	\newline
+		\begin{bchart}[step=0.03, max=0.06, unit=s]
+			\bcbar[text=serial]   {0.0517572}
+			\bcbar[text=1 thread] {0.0488780}
+			\bcbar[text=2 threads]{0.0250712}
+			\bcbar[text=3 threads]{0.0180976}
+			\bcbar[text=4 threads]{0.01380432}
+			\bcbar[text=5 threads]{0.0194655}
+			\bcbar[text=6 threads]{0.0172609}
+			\bcbar[text=7 threads]{0.0151024}
+			\bcbar[text=8 threads]{0.0139309}
+		\end{bchart}	
+\end{document}

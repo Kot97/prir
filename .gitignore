@@ -1,3 +1,5 @@
-/cmake-build-*/
+/*/cmake-build-*/
 .idea/
+*/*.jpeg
 /test_photos/
+#/*/doc/
