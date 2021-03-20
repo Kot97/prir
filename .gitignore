@@ -1,5 +1,9 @@
 /*/cmake-build-*/
 .idea/
-*/*.jpeg
-/test_photos/
+*.jpeg
+*.tif
+*.jpg
+!/test_photos/*
+*.aux
+*.log
 #/*/doc/
