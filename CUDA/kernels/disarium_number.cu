@@ -2,21 +2,23 @@ __device__ unsigned long countDigits(unsigned long number);
 
 __device__ bool isNumberDisarium(unsigned long number);
 
-__device__ unsigned long pow(unsigned long x,unsigned long n);
+__device__ unsigned long pow(unsigned long x, unsigned long n);
 
 __device__ void addResult(unsigned long *generatedNumbersGPU, unsigned long result);
 
-__global__ void generateDisariumNumbers(unsigned long *generatedNumbersGPU, const unsigned long NUMBERS_COUNT) {
+__device__ unsigned int findedNumbersCount = 0;//todo ogarnac inicjalizacje
+
+__global__ void generateDisariumNumbers(unsigned long *generatedNumbersGPU, const unsigned int NUMBERS_COUNT) {
     unsigned long i = blockIdx.x * blockDim.x + threadIdx.x;
-    while (i < NUMBERS_COUNT) {
+    while (findedNumbersCount < NUMBERS_COUNT) {
         if (isNumberDisarium(i))
             addResult(generatedNumbersGPU, i);
-        i += blockDim.x*gridDim.x;
+        i += blockDim.x * gridDim.x;
     }
 }
 
 __device__ void addResult(unsigned long *generatedNumbersGPU, unsigned long result) {
-
+    generatedNumbersGPU[atomicAdd(&findedNumbersCount, 1)] = result;//todo test synchronization
 }
 
 __device__ bool isNumberDisarium(unsigned long number) {
@@ -30,18 +32,17 @@ __device__ bool isNumberDisarium(unsigned long number) {
 }
 
 __device__ unsigned long countDigits(unsigned long number) {
-    unsigned int digits_count = 0;
+    unsigned int digitsCount = 0;
     while (number) {
         number /= 10;
-        digits_count++;
+        digitsCount++;
     }
-    return digits_count;
+    return digitsCount;
 }
 
 __device__ unsigned long pow(unsigned long x, unsigned long n) {
-    unsigned long result=1;
+    unsigned long result = 1;
     for (unsigned int i = 0; i < n; i++)
-        result*=x;
+        result *= x;
     return result;
 }
-
