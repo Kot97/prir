@@ -1,9 +1,7 @@
 #include <iostream>
 
-
 int main(int argc, char **argv) {
-    if (argc != 2)
-    {
+    if (argc != 2) {
         std::cerr << "You must run this program as: bradley <threads count> <path to image>";
         return 1;
     }

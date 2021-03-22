@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(bradley bradley.cpp)
+add_executable(bradley bradley.cu cudaUtils.cuh)
 target_link_libraries(bradley PRIVATE ${OpenCV_LIBS})
 set_target_properties(
         bradley
         PROPERTIES
         CUDA_SEPARABLE_COMPILATION ON)
 
-add_executable(disarium disarium.cu kernels/disarium_number.cu kernels/disarium_number.cuh)
+add_executable(disarium disarium.cu kernels/disarium_number.cu kernels/disarium_number.cuh cudaUtils.cuh)
 set_target_properties(
         disarium
         PROPERTIES
