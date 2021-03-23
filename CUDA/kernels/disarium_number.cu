@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 __device__ unsigned int countDigits(unsigned long number);
 
 __device__ bool isNumberDisarium(unsigned long number);
@@ -6,19 +8,21 @@ __device__ unsigned long pow(unsigned long x, unsigned int n);
 
 __device__ void addResult(unsigned long *generatedNumbersGPU, unsigned long result);
 
-__device__ unsigned int findedNumbersCount = 0;//todo ogarnac inicjalizacje
+__device__ volatile unsigned int findedNumbersCount = 0;
 
 __global__ void generateDisariumNumbers(unsigned long *generatedNumbersGPU, const unsigned int NUMBERS_COUNT) {
     unsigned long i = blockIdx.x * blockDim.x + threadIdx.x;
     while (findedNumbersCount < NUMBERS_COUNT) {
         if (isNumberDisarium(i))
             addResult(generatedNumbersGPU, i);
+        if (i % 100000000000 == 0)
+            printf("%ld\n", i);
         i += blockDim.x * gridDim.x;
     }
 }
 
 __device__ void addResult(unsigned long *generatedNumbersGPU, unsigned long result) {
-    generatedNumbersGPU[atomicAdd(&findedNumbersCount, 1)] = result;//todo test synchronization
+    generatedNumbersGPU[atomicAdd(const_cast<unsigned int *> (&findedNumbersCount), 1)] = result;
 }
 
 __device__ bool isNumberDisarium(unsigned long number) {

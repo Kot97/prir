@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(bradley bradley.cu cudaUtils.cuh)
+add_executable(bradley bradley.cu cudaUtils.cuh kernels/adaptive_thresholding.cu kernels/adaptive_thresholding.cuh)
 target_link_libraries(bradley PRIVATE ${OpenCV_LIBS})
 set_target_properties(
         bradley
