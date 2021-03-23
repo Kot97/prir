@@ -3,7 +3,7 @@
 #include "kernels/disarium_number.cuh"
 #include "cudaUtils.cuh"
 
-const unsigned int NUMBERS_COUNT = 20;
+const unsigned int NUMBERS_COUNT = 19;
 
 void printResult(const unsigned long *generatedNumbersCPU);
 
@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     generateDisariumNumbers <<< blocksNum, threadNum >>>(generatedNumbersGPU, NUMBERS_COUNT);
 
     synchronizeKernel();
-    transferDataFromGPU<unsigned long>(generatedNumbersGPU, generatedNumbersCPU, NUMBERS_COUNT);
+    transferDataFromGPU<unsigned long>(generatedNumbersCPU, generatedNumbersGPU, NUMBERS_COUNT);
     printResult(generatedNumbersCPU);
 
     cudaFree(generatedNumbersGPU);

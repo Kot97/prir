@@ -11,7 +11,7 @@ void synchronizeKernel() {
 }
 
 template<typename T>
-void transferDataFromGPU(T *generatedNumbersGPU, T *generatedNumbersCPU, unsigned long elementNumber) {
+void transferDataFromGPU(T *generatedNumbersCPU, T *generatedNumbersGPU, unsigned long elementNumber) {
     cudaError_t errorCode = cudaMemcpy(generatedNumbersCPU, generatedNumbersGPU, sizeof(T) * elementNumber,
                                        cudaMemcpyDeviceToHost);
     if (errorCode != cudaSuccess) {
@@ -21,6 +21,16 @@ void transferDataFromGPU(T *generatedNumbersGPU, T *generatedNumbersCPU, unsigne
     }
 }
 
+template<typename T>
+void transferDataToGPU(T *generatedNumbersGPU, T *generatedNumbersCPU, unsigned long elementNumber) {
+    cudaError_t errorCode = cudaMemcpy(generatedNumbersGPU, generatedNumbersCPU, sizeof(T) * elementNumber,
+                                       cudaMemcpyHostToDevice);
+    if (errorCode != cudaSuccess) {
+        std::cout << "error during transfer data to gpu " << cudaGetErrorName(errorCode)
+                  << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
 template<typename T>
 T *allocateArrayOnGPU(const unsigned long elementsNumber) {
     T *table_addr;

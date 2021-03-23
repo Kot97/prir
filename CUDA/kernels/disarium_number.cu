@@ -11,14 +11,9 @@ __device__ void addResult(unsigned long *generatedNumbersGPU, unsigned long resu
 __device__ volatile unsigned int findedNumbersCount = 0;
 
 __global__ void generateDisariumNumbers(unsigned long *generatedNumbersGPU, const unsigned int NUMBERS_COUNT) {
-    unsigned long i = blockIdx.x * blockDim.x + threadIdx.x;
-    while (findedNumbersCount < NUMBERS_COUNT) {
+    for (unsigned long i = blockIdx.x * blockDim.x + threadIdx.x; findedNumbersCount < NUMBERS_COUNT; i += blockDim.x * gridDim.x)
         if (isNumberDisarium(i))
             addResult(generatedNumbersGPU, i);
-        if (i % 100000000000 == 0)
-            printf("%ld\n", i);
-        i += blockDim.x * gridDim.x;
-    }
 }
 
 __device__ void addResult(unsigned long *generatedNumbersGPU, unsigned long result) {
