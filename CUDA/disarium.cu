@@ -8,10 +8,6 @@ const unsigned int NUMBERS_COUNT = 100000;
 
 const unsigned int THREADS_NUM = 128;
 
-unsigned int getBlocksNumber(const unsigned int threadsNum, const unsigned int numbersCount) {
-    return ceil(numbersCount / threadsNum) + 1;
-}
-
 void printResult(const unsigned int *generatedNumbers, const bool *result);
 
 void generateNumbers(unsigned int *table, unsigned int n);

@@ -1,6 +1,10 @@
 #ifndef PRIR_CUDAUTILS_CUH
 #define PRIR_CUDAUTILS_CUH
 
+unsigned int getBlocksNumber(const unsigned int threadsNum, const unsigned int elementsCount) {
+    return ceil(elementsCount / threadsNum) + 1;
+}
+
 void checkError(cudaError_t returnCode, std::string exceptionMessage) {
     if (returnCode != cudaSuccess) {
         std::cout << exceptionMessage << ": " << cudaGetErrorName(returnCode)

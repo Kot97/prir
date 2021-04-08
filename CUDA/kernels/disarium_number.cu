@@ -5,7 +5,7 @@ __device__ bool isNumberDisarium(unsigned int number);
 __device__ unsigned int pow(unsigned int x, unsigned int n);
 
 __global__ void generateDisariumNumbers(unsigned int *generatedNumbers, bool *result, const unsigned int NUMBERS_COUNT) {
-    for (unsigned int i = blockIdx.x * blockDim.x + threadIdx.x; i < NUMBERS_COUNT; i += blockDim.x * gridDim.x)
+    for (unsigned int i = blockIdx.x * blockDim.x + threadIdx.x; i < NUMBERS_COUNT; i += blockDim.x)
         result[i] = isNumberDisarium(generatedNumbers[i]);
 }
 
