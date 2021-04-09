@@ -7,8 +7,7 @@ unsigned int getBlocksNumber(const unsigned int threadsNum, const unsigned int e
 
 void checkError(cudaError_t returnCode, std::string exceptionMessage) {
     if (returnCode != cudaSuccess) {
-        std::cout << exceptionMessage << ": " << cudaGetErrorName(returnCode)
-                  << std::endl;
+        std::cout << exceptionMessage << ": " << cudaGetErrorName(returnCode) << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -19,15 +18,13 @@ void synchronizeKernel() {
 
 template<typename T>
 void transferDataFromGPU(T *arrayOnCPU, T *arrayOnGPU, size_t elementNumber) {
-    cudaError_t errorCode = cudaMemcpy(arrayOnCPU, arrayOnGPU, sizeof(T) * elementNumber,
-                                       cudaMemcpyDeviceToHost);
+    cudaError_t errorCode = cudaMemcpy(arrayOnCPU, arrayOnGPU, sizeof(T) * elementNumber, cudaMemcpyDeviceToHost);
     checkError(errorCode, "error during transfer data from gpu");
 }
 
 template<typename T>
 void transferDataToGPU(T *arrayOnGPU, T *arrayOnCPU, size_t elementNumber) {
-    cudaError_t errorCode = cudaMemcpy(arrayOnGPU, arrayOnCPU, sizeof(T) * elementNumber,
-                                       cudaMemcpyHostToDevice);
+    cudaError_t errorCode = cudaMemcpy(arrayOnGPU, arrayOnCPU, sizeof(T) * elementNumber, cudaMemcpyHostToDevice);
     checkError(errorCode, "error during transfer data to gpu");
 }
 
@@ -37,12 +34,6 @@ T *allocateArrayOnGPU(const size_t elementsNumber) {
     cudaError_t errorCode = cudaMalloc((void **) &table_addr, elementsNumber * sizeof(T));
     checkError(errorCode, "error during alloc memory on GPU, error code");
     return table_addr;
-}
-
-template<typename T>
-void setMemoryOnGPU(T *table_addr, int value, const size_t elementsNumber) {
-    cudaError_t errorCode = cudaMemset(table_addr, value, elementsNumber * sizeof(T));
-    checkError(errorCode, "error during preparing memory on GPU, error code");
 }
 
 template<typename T>

@@ -21,12 +21,12 @@ int main(int argc, char **argv) {
 
     unsigned char *inputArrayGPU = allocateArrayOnGPU<unsigned char>(imgSize);
     transferDataToGPU<unsigned char>(inputArrayGPU, imgArray, imgSize);
-
     unsigned int *bufferArrayGPU = allocateArrayOnGPU<unsigned int>(imgSize);
-
     unsigned char *outputArrayGPU = allocateArrayOnGPU<unsigned char>(imgSize);
-//    setMemoryOnGPU<unsigned char>(outputArrayGPU, 0, imgSize);
 
+    //todo calculate and set s2 and T
+    checkError(cudaMemcpyToSymbol(width, &srcImg.cols, sizeof(int)), "error during copy data to symbol on GPU 1");
+    checkError(cudaMemcpyToSymbol(height, &srcImg.rows, sizeof(int)), "error during copy data to symbol on GPU 2");
 
     unsigned long maxSize = max(srcImg.cols, srcImg.rows);
 
@@ -34,11 +34,10 @@ int main(int argc, char **argv) {
 
     std::cout << "THREADS_NUM: " << THREADS_NUM << std::endl
               << "blocksNum: " << blocksNum << std::endl;
-    std::cout << "unsigned char: " << sizeof(unsigned char)<< std::endl
+    std::cout << "unsigned char: " << sizeof(unsigned char) << std::endl
               << "unsigned int: " << sizeof(unsigned int) << std::endl;
 
-    bradleyBinarization<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU, outputArrayGPU, srcImg.cols,
-                                                      srcImg.rows);
+    bradleyBinarization<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU, outputArrayGPU);
     synchronizeKernel();
 
     transferDataFromGPU<unsigned char>(imgArray, outputArrayGPU, imgSize);
@@ -47,6 +46,6 @@ int main(int argc, char **argv) {
     cudaFree(bufferArrayGPU);
     cudaFree(outputArrayGPU);
 
-    cv::imwrite("/home/students/2021DS/grkrol/prir/out.jpeg", srcImg);
+    cv::imwrite("/home/students/2021DS/grkrol/prir/out.jpeg", srcImg); //todo fix path
     return 0;
 }
