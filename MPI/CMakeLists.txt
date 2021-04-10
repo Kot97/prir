@@ -11,6 +11,9 @@ include_directories(${OpenCV_INCLUDE_DIRS} ${MPI_INCLUDE_PATH})
 add_executable(bradley bradley.cpp lib/adaptive_thresholding.cpp)
 target_link_libraries(bradley PRIVATE ${OpenCV_LIBS} ${MPI_LIBRARIES})
 
+add_executable(bradley_serial bradley_serial.cpp lib/adaptive_thresholding.cpp)
+target_link_libraries(bradley_serial PRIVATE ${OpenCV_LIBS} ${MPI_LIBRARIES})
+
 add_executable(disarium disarium.cpp lib/disarium_number.cpp)
 target_link_libraries(disarium PRIVATE ${MPI_LIBRARIES})
 
