@@ -1,0 +1,85 @@
+\documentclass[12pt]{article}
+\usepackage{polski}
+\usepackage{bchart}
+\usepackage{graphicx} 
+\usepackage[utf8]{inputenc}
+\title{Sprawozdanie z labolatorium 1}
+\author{Grzegorz Król, Marcin Kurdziel}
+\begin{document}
+ 	\maketitle
+ 	\section{Specyfikacja maszyny testowej}
+ 		\begin{itemize}
+ 			\item System operacyjny: Ubuntu 20.04.2 LTS
+ 			\item Procesor Intel: i5-6200U 4 x 2,3GHz, turbo boost 2,8Ghz
+ 			\item Ram przydzielony maszynie wirtualnej: 16GB DDR3
+ 		\end{itemize}	
+	\section{Algorytm binaryzacji adaptacyjnej Bradleya}
+	
+		\subsection{Implementacja algorytmu}
+		W stosunku do poprzedniej implementacji dla OpenMP, operacje zostały wyciągnięte z klasy do funkcji, a wynik zwracany jest poprzez argument przesłany przez referencję. \\
+			
+Algorytm został zrównoleglony bardzo wydajnie - poszczególne węzły dostają do przetworzenia wiersze obrazu (klasy cv::Mat), który odpowiada ich rankowi, a węzeł o ranku 0 przetwarza, poza ilością wierszy, także pozostałe po przydziale wiersze. Na końcu węzeł o ranku 0 otrzymuje od pozostałych przetworzone dane, które są od razu zapisywane w zwracanej macierzy - jest to jedyna komunikacja występująca w algorytmie, dzięki czemu narzut na nią został zminimalizowany. \\
+		
+Jedyną optymalizacją, jaką możnaby jeszcze wprowadzić, byłoby usprawnienie sposobu przekazywania do metody run\_serial(), reużywanej przez każdy węzeł, danych do przetworzenia - obecnie przez przesłaniem konstruowany jest obiekt klasy cv::Mat, gdyż wymaga tego użyta w ciele funkcji run\_serial() funkcja cv::integral(). \\
+		
+Próbowaliśmy wykorzystać własną implementację funkcji cv::intagral(), operującą bezpośrednio na uchar*, jednakże spowolniło to działanie algorytmu niemal pięciokrotnie, dlatego zostaliśmy przy poprzedniej wersji, która widać jest zoptymalizowana. \\
+		
+		\subsection{Sposób testowania}
+		Program, uruchamiany jest oczywiście za pomocą komendy \textit{mpirun}. \\
+W przeciwieństwie do poprzedniego laboratorium, tym razem program seryjny został oddzielony od równoległego. \\
+Do testów wykorzystany został przedstawiony obraz o rozmiarach 22373x4561 pikseli. \\
+Warto dodać, że z uwagi na specyfikę środowiska MPI, na sprzęcie o 4 wątkach sprzętowych niemożliwe było uruchomienie więcej niż 4 węzłów, stąd też nie podano czasu wykonania dla liczby węzłów więcej niż 4.
+		\begin{figure}[ht]
+		\includegraphics[width=\textwidth] {city2.jpg}
+		\end{figure}
+		\subsection{Zebrane wyniki}	
+		Poniższa tabela zawiera zebrane wyniki: \newline
+		
+		\begin{tabular}{|r|l|}  \hline 
+			serial	&	0.536972 s \\
+			1 node	&	0.534138 s \\
+			2 nodes	&	0.4965 s \\
+			3 nodes	&	0.342731 s \\
+			4 nodes	&	0.256342 s \\
+			\hline
+		\end{tabular}\newline 
+		
+		Poniższy wykres prezentuje dane tabeli w graficznej formie:	\newline
+		\begin{bchart}[step=0.15, max=0.6, unit=s]
+			\bcbar[text=serial] {0.536972}
+			\bcbar[text=1 node] {0.534138}
+			\bcbar[text=2 nodes]{0.4965}
+			\bcbar[text=3 nodes]{0.342731}
+			\bcbar[text=4 nodes]{0.256342}
+		\end{bchart}
+	
+	\section{Algorytm "Disarium Number"}
+		\subsection{Implementacja algorytmu}
+Algorytm zaimplementowany został w podobny, zoptymalizowany sposób - komunikacja pomiędzy węzłami została ograniczona do minimum.
+		\subsection{Sposób testowania}
+Podobnie jak i w przypadku poprzedniego algorytmu i tym razem użyta została funkcja benchmark.
+		\subsection{Zebrane wyniki}	
+				Poniższa tabela zawiera zebrane wyniki: \newline
+		\begin{tabular}{|r|l|} \hline
+			serial	&	0.0120056 s \\
+			1 node	&	0.0116881 s \\
+			2 nodes	&	0.00869592 s \\
+			3 nodes	&	0.0057525 s \\
+			4 nodes	&	0.00422513 s \\
+			\hline
+		\end{tabular}\newline 
+		
+		Poniższy wykres prezentuje dane tabeli w graficznej formie:	\newline
+		\begin{bchart}[step=0.003, max=0.015, unit=s]
+			\bcbar[text=serial] {0.0120056}
+			\bcbar[text=1 node] {0.0116881}
+			\bcbar[text=2 nodes]{0.00869592}
+			\bcbar[text=3 nodes]{0.0057525}
+			\bcbar[text=4 nodes]{0.00422513}
+		\end{bchart}	
+
+
+	\section{Różnica w stosunku do OpenMP}
+	Niniejsze czasy wykonania programów, nawet wersji seryjnych, są dużo mniejsze niż poprzednio, ponieważ pomiary przeprowadzane były na innym sprzęcie z nowszym, choć o niższym taktowaniu, procesorem.
+	
+\end{document}
