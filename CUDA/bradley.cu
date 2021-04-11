@@ -4,7 +4,7 @@
 #include "cudaUtils.cuh"
 #include "kernels/adaptive_thresholding.cuh"
 
-const unsigned int THREADS_NUM = 128;
+const unsigned int THREADS_NUM = 64;
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -24,9 +24,13 @@ int main(int argc, char **argv) {
     unsigned int *bufferArrayGPU = allocateArrayOnGPU<unsigned int>(imgSize);
     unsigned char *outputArrayGPU = allocateArrayOnGPU<unsigned char>(imgSize);
 
-    //todo calculate and set s2 and T
-    checkError(cudaMemcpyToSymbol(width, &srcImg.cols, sizeof(int)), "error during copy data to symbol on GPU 1");
-    checkError(cudaMemcpyToSymbol(height, &srcImg.rows, sizeof(int)), "error during copy data to symbol on GPU 2");
+    unsigned int S = srcImg.cols/8;
+    unsigned int s2 = S/2;
+    double t = 15;
+    checkError(cudaMemcpyToSymbol(S2, &s2, sizeof(S2)), "error during copy data to symbol S on GPU");
+    checkError(cudaMemcpyToSymbol(T, &t, sizeof(T)), "error during copy data to symbol T on GPU");
+    checkError(cudaMemcpyToSymbol(width, &srcImg.cols, sizeof(width)), "error during copy data to symbol width on GPU");
+    checkError(cudaMemcpyToSymbol(height, &srcImg.rows, sizeof(height)), "error during copy data to symbol height on GPU");
 
     unsigned long maxSize = max(srcImg.cols, srcImg.rows);
 
@@ -34,8 +38,6 @@ int main(int argc, char **argv) {
 
     std::cout << "THREADS_NUM: " << THREADS_NUM << std::endl
               << "blocksNum: " << blocksNum << std::endl;
-    std::cout << "unsigned char: " << sizeof(unsigned char) << std::endl
-              << "unsigned int: " << sizeof(unsigned int) << std::endl;
 
     bradleyBinarization<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU, outputArrayGPU);
     synchronizeKernel();

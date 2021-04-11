@@ -3,8 +3,8 @@
 
 extern __constant__ int width;
 extern __constant__ int height;
-extern __constant__ unsigned int s2;
-extern __constant__ unsigned int T;
+extern __constant__ int S2;
+extern __constant__ double T;
 
 __global__ void bradleyBinarization(unsigned char *inputArray, unsigned int *sumMat, unsigned char *outputArray);
 
