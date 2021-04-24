@@ -14,32 +14,39 @@ int main(int argc, char **argv) {
     std::cout << "Bradley algorithm on image " << argv[1] << std::endl;
     cv::Mat srcImg = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
     unsigned char *imgArray = srcImg.isContinuous() ? srcImg.data : srcImg.clone().data;
-    unsigned int imgSize = srcImg.total() * srcImg.channels();
+    unsigned int imgSize = srcImg.cols * srcImg.rows;
 
     std::cout << "width: " << srcImg.cols << std::endl
-              << "height: " << srcImg.rows << std::endl;
+              << "height: " << srcImg.rows << std::endl
+              << "imgSize: " << imgSize << std::endl;
 
     unsigned char *inputArrayGPU = allocateArrayOnGPU<unsigned char>(imgSize);
     transferDataToGPU<unsigned char>(inputArrayGPU, imgArray, imgSize);
     unsigned int *bufferArrayGPU = allocateArrayOnGPU<unsigned int>(imgSize);
     unsigned char *outputArrayGPU = allocateArrayOnGPU<unsigned char>(imgSize);
 
-    unsigned int S = srcImg.cols/8;
-    unsigned int s2 = S/2;
-    double t = 15;
+    unsigned int S = srcImg.cols / 8;
+    unsigned int s2 = S / 2;
+    double t = 0.15;
+    std::cout << "s2: " << s2 << std::endl
+              << "t: " << t << std::endl;
     checkError(cudaMemcpyToSymbol(S2, &s2, sizeof(S2)), "error during copy data to symbol S on GPU");
     checkError(cudaMemcpyToSymbol(T, &t, sizeof(T)), "error during copy data to symbol T on GPU");
     checkError(cudaMemcpyToSymbol(width, &srcImg.cols, sizeof(width)), "error during copy data to symbol width on GPU");
     checkError(cudaMemcpyToSymbol(height, &srcImg.rows, sizeof(height)), "error during copy data to symbol height on GPU");
 
-    unsigned long maxSize = max(srcImg.cols, srcImg.rows);
+    unsigned long blocksNum;
 
-    unsigned long blocksNum = getBlocksNumber(THREADS_NUM, maxSize);
+    blocksNum = getBlocksNumber(THREADS_NUM, srcImg.cols);
+    verticalSum<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU);
+    synchronizeKernel();
 
-    std::cout << "THREADS_NUM: " << THREADS_NUM << std::endl
-              << "blocksNum: " << blocksNum << std::endl;
+    blocksNum = getBlocksNumber(THREADS_NUM, srcImg.rows);
+    horizontalSum<<< blocksNum, THREADS_NUM >>>(bufferArrayGPU);
+    synchronizeKernel();
 
-    bradleyBinarization<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU, outputArrayGPU);
+    blocksNum = getBlocksNumber(THREADS_NUM, imgSize);
+    binarization<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU, outputArrayGPU);
     synchronizeKernel();
 
     transferDataFromGPU<unsigned char>(imgArray, outputArrayGPU, imgSize);
