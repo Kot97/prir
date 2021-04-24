@@ -33,7 +33,7 @@ __global__ void horizontalSum(unsigned int *outputArray) {
     if (row < height) {
         for (int col = 1; col < width; col++) {
             int index = getIndex(col, row);
-            outputArray[index] = outputArray[index] + outputArray[index - 1];
+            outputArray[index] += outputArray[index - 1];
         }
     }
 }
@@ -52,9 +52,9 @@ __global__ void binarization(const unsigned char *inputArray, const unsigned int
         int count = (x1 - x0) * (y1 - y0);
         long sum = sumMat[getIndex(x1, y1)] - sumMat[getIndex(x1, y0)] - sumMat[getIndex(x0, y1)] + sumMat[getIndex(x0, y0)];
 
-        if (inputArray[getIndex(col, row)] * count < (int) (sum * (1.0 - T)))
-            outputArray[getIndex(col, row)] = 0;
+        if (inputArray[index] * count < (int) (sum * (1.0 - T)))
+            outputArray[index] = 0;
         else
-            outputArray[getIndex(col, row)] = 255;
+            outputArray[index] = 255;
     }
 }
