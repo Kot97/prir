@@ -50,19 +50,19 @@ void runKernel(unsigned int *generatedNumbersGPU, bool *resultGPU) {
 
     float time;
     cudaEvent_t start, stop;
-
     cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+
     cudaEventRecord(start, 0);
 
     generateDisariumNumbers <<< blocksNumber, THREADS_NUM >>>(generatedNumbersGPU, resultGPU, NUMBERS_COUNT);
 
-//    synchronizeKernel(); //todo check is synch work
-    cudaEventCreate(&stop);
     cudaEventRecord(stop, 0);
     cudaEventSynchronize(stop);
 
     cudaEventElapsedTime(&time, start, stop);
-    printf("Time to generate:  %3.5f ms \n", time);
+    printf("Time to generate: %f ms \n", time);
 
     cudaEventDestroy(start);
     cudaEventDestroy(stop);

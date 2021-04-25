@@ -1,11 +1,10 @@
 #include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include <channel_descriptor.h>
 #include "cudaUtils.cuh"
 #include "kernels/adaptive_thresholding.cuh"
 
-const unsigned int THREADS_NUM = 64;
+const unsigned int THREADS_NUM = 32;
 
 cv::Mat readImage(int argc, char *const *argv);
 
@@ -34,7 +33,7 @@ int main(int argc, char **argv) {
     freeArrayGPU(bufferArrayGPU);
     freeArrayGPU(outputArrayGPU);
 
-    cv::imwrite("/home/students/2021DS/grkrol/prir/out.jpeg", srcImg); //todo fix path
+    cv::imwrite("out.jpeg", srcImg);
     return 0;
 }
 
@@ -62,17 +61,29 @@ void setConstantMemory(unsigned int cols, unsigned int rows) {
 
 void runKernels(const unsigned char *inputArrayGPU, unsigned int *bufferArrayGPU, unsigned char *outputArrayGPU, unsigned int cols,
                 unsigned int rows) {
+    float time;
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
     unsigned long blocksNum;
-    //todo add benchmarks
+
+    cudaEventRecord(start, 0);
     blocksNum = getBlocksNumber(THREADS_NUM, cols);
     verticalSum<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU);
     synchronizeKernel();
 
     blocksNum = getBlocksNumber(THREADS_NUM, rows);
     horizontalSum<<< blocksNum, THREADS_NUM >>>(bufferArrayGPU);
-    synchronizeKernel();
 
     blocksNum = getBlocksNumber(THREADS_NUM, cols * rows);
     binarization<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU, outputArrayGPU);
-    synchronizeKernel();
+
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+
+    cudaEventElapsedTime(&time, start, stop);
+    printf("Time to generate: %f ms \n", time);
+
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
 }
