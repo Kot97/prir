@@ -70,7 +70,6 @@ void runKernels(const unsigned char *inputArrayGPU, unsigned int *bufferArrayGPU
     cudaEventRecord(start, 0);
     blocksNum = getBlocksNumber(THREADS_NUM, cols);
     verticalSum<<< blocksNum, THREADS_NUM >>>(inputArrayGPU, bufferArrayGPU);
-    synchronizeKernel();
 
     blocksNum = getBlocksNumber(THREADS_NUM, rows);
     horizontalSum<<< blocksNum, THREADS_NUM >>>(bufferArrayGPU);

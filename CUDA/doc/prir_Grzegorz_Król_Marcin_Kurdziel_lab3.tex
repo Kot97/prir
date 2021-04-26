@@ -1,0 +1,105 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+\usepackage[table]{xcolor}
+\usepackage{bchart}
+\usepackage{graphicx}
+
+\title{Sprawozdanie z laboratorium 3}
+\author{Grzegorz Król, Marcin Kurdziel}
+
+\begin{document}
+ 	\maketitle
+ 	
+ 	\section{Specyfikacja maszyny testowej}
+ 		\begin{itemize}
+ 			\item OS Ubuntu 18.04.3 LTS
+ 			\item CPU Intel: i7-950 4x3,07GHz, turbo boost 3,33Ghz
+ 			\item RAM 24GB
+ 			\item GPU GeForce RTX 2080 Ti CUDA cores 4352 (base clock: 1545 MHz)
+ 			\item CUDA Version 10.0
+ 			\item GPU Driver Version 410.104
+ 		\end{itemize}
+ 	
+ 	\section{Algorytm "Disarium Number"}
+ 		\subsection{Implementacja algorytmu}
+ 			Implementacja algorytmu rozpoczyna pracę od wygenerowania przy użyciu CPU tablicy 100 000 losowych liczb, następnie dochodzi do alokacji pamięci na GPU oraz transferu wygenerowanej tablicy do urządzenia. Dodatkowo alokowana jest tablica przeznaczona na predykcje czy liczba jest disarium. Po zakończonej pracy i pobraniu wyników z urządzenia wypisywane są liczby będące disarium oraz zwalniane są zasoby.
+ 		
+ 		\subsection{Sposób testowania}
+ 			Algorytm przetestowany został dla 5 różnych wartości ilości wątków współpracujących w ramach bloku. Dla każdej z nich testy zostały powtórzone dziesięciokrotnie. Zmierzone zostały czasy pracy samego kernela przy użyciu eventów CUDA. 
+ 		
+ 		\subsection{Zebrane wyniki}	
+ 			Poniższa tabela zawiera uśrednione wyniki:
+ 		
+			\begin{table}[htb]
+			\begin{tabular}{lll}
+				\rowcolor[HTML]{cccccc} 
+				threads     & blocks	&  avg time\\
+	 			16  threads	& 6251		&	0,076506 ms \\
+	 			32  threads	& 3126		&	0,030314 ms \\
+	 			64  threads	& 1563		&	0,028896 ms \\
+	 			128 threads	&  782		&	0,025859 ms \\
+	 			256 threads	&  391		&	0,027904 ms
+			\end{tabular}
+			\end{table} 
+		
+			Ilość bloków została obliczona jako minimalna niezbędna do rozwiązania problemu z założeniem, że jeden wątek rozwiązuje jeden problem. \newline
+ 	
+ 			Poniższy wykres prezentuje dane z tabeli w graficznej formie:
+ 		
+ 			\begin{bchart}[step=0.05, max=0.10, unit=ms]
+ 				\bcbar[text= 16 threads]{0.076506}
+ 				\bcbar[text= 32 threads]{0.030314}
+ 				\bcbar[text= 64 threads]{0.028896}
+ 				\bcbar[text=128 threads]{0.025859}
+ 				\bcbar[text=256 threads]{0.027904}
+ 			\end{bchart}	
+ 		
+ 		\subsection{Wnioski}
+ 			Dla rozwiązanego problemu najoptymalniejsza wydaje się liczba 128 wątków per blok. Zapewne wynika to z faktu że pojedynczy wątek nie korzysta z dużej porcji danych pochodzących z pamięci globalnej oraz nie jest wymagany duży rozmiar pamięci cache oraz rejestrów. W związku z tym odnosimy spore zyski z wykorzystania możliwości szybkiej wymiany wykonywanego warpa przez procesor strumieniowy. Dodatkowo wartość 16 wątków per blok powoduje, że procesor strumieniowy wykonując blok wykorzystuje tylko połowę swoich rdzeni.
+	
+	\section{Algorytm binaryzacji adaptacyjnej Bradleya}
+	
+		\subsection{Implementacja algorytmu}
+			Algorytm binaryzacji adaptacyjnej Bradleya okazał się być bardziej skomplikowany niż Disarium. Dodatkowo kod różni się znacząco od tego wykorzystanego w przypadku OpenMPI i MPI. Implementacja dokonuje wczytania obrazu, a następnie alokuje na urządzeniu trzy tablice o rozmiarze równym ilości pikseli w obrazie. Dwie z nich są typu unsigned char i są przeznaczone na obraz wejściowy oraz wynikowy. Trzecia typu unsigned int jest wykorzystywana do przechowania integrala obrazu. Po przekopiowaniu obrazu do urządzenia ustawiane są stałe znajdujące się w niemodyfikowalnym obszarze pamięci karty graficznej. Następnie dokonywana jest binaryzacja obrazu przy użyciu trzech kerneli. Pierwszy sumuje wartości obrazu w kolumnach, drugi w wierszach, a trzeci przeprowadza właściwą binaryzacje. Takie podejście może wydać się marnotrawstwem czasu na uruchamianie kerneli, natomiast jest naturalnym podejściem przy wykorzystaniu technologi CUDA gdzie kernel służy do rozwiązania problemu o konkretnym rozmiarze. Dodatkowo takie podejście rozwiązuje problemy wynikające z synchronizacji wątków działających w różnych blokach. Po zakończeniu działania kerneli program zapisuje wynik do pliku "out.jpeg" oraz zwalnia zasoby.
+		
+		\subsection{Sposób testowania}
+			Algorytm przetestowany został dla 5 różnych wartości ilości wątków współpracujących w ramach bloku. Dla każdej z nich testy zostały powtórzone dziesięciokrotnie.Do testów wykorzystany został przedstawiony obraz o rozmiarach 22373x4561 pikseli. 
+		 
+			\begin{figure}[ht]
+			\includegraphics[width=\textwidth] {../../test_photos/city2.jpg}
+			\end{figure}
+		
+			Mierzony był czas potrzebny na wykonanie wszystkich trzech kerneli. Do pomiaru wykorzystane zostały eventy CUDA. 
+	
+		\subsection{Zebrane wyniki}	
+ 			Poniższa tabela zawiera uśrednione wyniki:
+			
+			\begin{table}[htb]
+			\begin{tabular}{lllll}
+			\rowcolor[HTML]{cccccc} 
+				threads & 1 blocks	& 2 blocks	& 3 blocks	& avg time\\
+	 			16  	& 1399 		& 286		& 6377704	& 15,310035 ms \\
+				32  	& 700		& 143		& 3188852	& 12,694243 ms \\
+				64  	& 350		& 72		& 1594426	& 13,296496 ms \\
+				128 	& 175		& 36		& 797213	& 14,921373 ms \\
+				256 	& 88		& 18		& 398607	& 15,905610 ms 
+			\end{tabular}
+			\end{table} 
+		
+			Kolumny "1 blocks", "2 blocks" i "3 blocks" zawierają liczbę bloków niezbędnych do wykonania poszczególnych trzech kerneli. \newline
+		
+			Poniższy wykres prezentuje dane tabeli w graficznej formie:
+			
+			\begin{bchart}[step=4, max=16, unit=ms]
+ 				\bcbar[text= 16 threads]{15.310035}
+				\bcbar[text= 32 threads]{12.694243}
+				\bcbar[text= 64 threads]{13.296496}
+				\bcbar[text=128 threads]{14.921373}
+				\bcbar[text=256 threads]{15.905610}
+			\end{bchart}
+		
+		 \subsection{Wnioski}
+		 
+		 Dla rozwiązania problemu najoptymalniejsza wydaje się być liczba 32 wątków per blok. Szczerze mówiąc nieco dziwi mnie otrzymany wynik bo algorytm teoretycznie powinien generować sporo sprowadzeń danych z pamięci globalnej do cache z uwagi na wykorzystywanie pikseli z poprzednich rekordów, które są dość daleko w pamięci. Prawdopodobnie jednak w przypadku wykorzystywania mechanizmu podmiany warpów w bloku dochodziło do sytuacji gdy jeden warp nadpisywał dane wykorzystywane przed poprzedni warp w związku z czym zwiększało to ilość braku danych w pamięci cache. W praktyce potwierdza to moje doświadczenie z technologią CUDA, iż ilość wątków per blok należy dobrać doświadczalnie. Dodatkowo sporo powiedziała by nam analiza programu przy użyciu Nvidia Visual Profiler aczkolwiek ze względu na brak czasu nie udało mi się takowej wykonać.
+\end{document}
